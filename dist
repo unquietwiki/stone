@@ -1,0 +1,81 @@
+#!/bin/sh
+case "$1" in
+    [0-9].[0-9][a-z]-[0-9].[0-9][0-9][0-9])	ver=$1	;;
+    [0-9].[0-9][a-z]-[0-9].[0-9].[0-9].[0-9])	ver=$1	;;
+    [0-9].[0-9][a-z]-[0-9].[0-9].[0-9].[0-9][0-9])	ver=$1	;;
+    [0-9].[0-9][a-z])	ver=$1	;;
+    [0-9].[0-9])	ver=$1	;;
+    *)	echo "Usage dist <version> [<time stamp>]"
+	exit 1
+	;;
+esac
+shift
+stoneme=stone23me
+stonent=stone23nt
+stonexp=stone23xp
+stonefon=stone23fon
+if [ -n "$1" ]
+then	stamp=$1
+fi
+rm -rf stone-$ver stoneme-$ver.zip stonent-$ver.zip stonexp-$ver.zip
+
+nkf_s() {
+	nkf -sc $1 > $2/$1
+	tscopy $1 $2/$1
+}
+
+make clean
+make mingw-me && mv stone.exe $stoneme/
+nkf_s	README.txt	$stoneme
+nkf_s	README.en.txt	$stoneme
+nkf_s	stone.c		$stoneme
+nkf_s	Makefile	$stoneme
+nkf_s	GPL.txt		$stoneme
+nkf_s	logmsg.mc	$stoneme
+nkf_s	cryptoapi.c	$stoneme
+
+make mingw-nt && mv stone.exe $stonent/
+nkf_s	README.txt	$stonent
+nkf_s	README.en.txt	$stonent
+nkf_s	stone.c		$stonent
+nkf_s	Makefile	$stonent
+nkf_s	GPL.txt		$stonent
+nkf_s	logmsg.mc	$stonent
+nkf_s	cryptoapi.c	$stonent
+
+make mingw-svc && mv stone.exe $stonexp/
+nkf_s	README.txt	$stonexp
+nkf_s	README.en.txt	$stonexp
+nkf_s	stone.c		$stonexp
+nkf_s	Makefile	$stonexp
+nkf_s	GPL.txt		$stonexp
+nkf_s	logmsg.mc	$stonexp
+nkf_s	cryptoapi.c	$stonexp
+
+mkdir stone-$ver
+#cp -p README.en.txt stone.1 README.txt stone.1.ja stone.c Makefile GPL.txt logmsg.mc cryptoapi.c stone-$ver/.
+cp -p README.en.txt README.txt stone.c Makefile GPL.txt logmsg.mc cryptoapi.c stone-$ver/.
+sed -e "s/^Version: .*/Version: $ver/" stone.spec > stone-$ver/stone.spec
+
+if [ -n "$stamp" ]
+then	touch -t $stamp  \
+	$stoneme/README.*    $stonent/README.*    $stonexp/README.*    \
+	$stoneme/stone.c     $stonent/stone.c     $stonexp/stone.c     \
+	$stoneme/stone.exe   $stonent/stone.exe   $stonexp/stone.exe   \
+	$stoneme/Makefile    $stonent/Makefile    $stonexp/Makefile    \
+	$stoneme/logmsg.mc   $stonent/logmsg.mc   $stonexp/logmsg.mc   \
+	$stoneme/cryptoapi.c $stonent/cryptoapi.c $stonexp/cryptoapi.c \
+	stone-$ver/README.* stone-$ver/stone.c stone-$ver/Makefile \
+	stone-$ver/stone.spec \
+	stone-$ver/logmsg.mc \
+	stone-$ver/cryptoapi.c \
+	README.* stone.c Makefile
+	find $stoneme $stonent $stonexp stone-$ver -type d \
+		| xargs touch -t $stamp
+	tar czf stone-$ver.tar.gz stone-$ver
+	zip -r stoneme-$ver.zip $stoneme
+	zip -r stonent-$ver.zip $stonent
+	zip -r stonexp-$ver.zip $stonexp
+	touch -t $stamp stone-$ver.tar.gz \
+		stoneme-$ver.zip stonent-$ver.zip stonexp-$ver.zip
+fi
