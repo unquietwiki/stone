@@ -446,7 +446,7 @@ int SSL_CTX_use_CryptoAPI_certificate(SSL_CTX *ssl_ctx, const char *cert_prop)
 	goto err;
     /* SSL_CTX_use_RSAPrivateKey() increased the reference count in 'rsa', so
      * we decrease it here with RSA_free(), or it will never be cleaned up. */
-    RSA_free(rsa);
+//    RSA_free(rsa);
     return 1;
 
   err:
