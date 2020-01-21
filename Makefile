@@ -1,5 +1,6 @@
 # stone		simple repeater
-# Copyright(c)1995-2004 by Hiroaki Sengoku <sengoku@gcd.org>
+# Copyright(c)1995-2016 by Hiroaki Sengoku <sengoku@gcd.org>
+# Updated 2020 by Michael Adams <unquietwiki@gmail.com>
 #
 # -DUSE_POP	use POP -> APOP conversion
 # -DUSE_SSL	use OpenSSL
@@ -16,8 +17,8 @@
 # -DPTHREAD     use Posix Thread
 # -DPRCTL	use prctl(2) - operations on a process
 # -DOS2		OS/2 with EMX
-# -DWINDOWS	Windows95/98/NT
-# -DNT_SERVICE	WindowsNT/2000 native service
+# -DWINDOWS	Windows application
+# -DNT_SERVICE	Windows native service
 
 CFLAGS=		-D_GNU_SOURCE # -g
 
@@ -45,10 +46,10 @@ all:
 	@echo "solaris   ; for Solaris with gcc"
 	@echo "hp        ; for HP-UX with gcc"
 	@echo "irix      ; for IRIX"
-	@echo "win       ; for Windows 95/NT with VC++"
-	@echo "win-svc   ; for Windows NT service with VC++"
-	@echo "mingw     ; for Windows 95/NT with MinGW"
-	@echo "mingw-svc ; for Windows NT service with MinGW"
+	@echo "win       ; for Windows application with VC++"
+	@echo "win-svc   ; for Windows service with VC++"
+	@echo "mingw     ; for Windows application with MinGW"
+	@echo "mingw-svc ; for Windows service with MinGW"
 	@echo "emx       ; for OS/2 with EMX"
 	@echo "using POP -> APOP conv., add '-pop' (example: linux-pop)"
 	@echo "using above conv. and OpenSSL, add '-ssl' (example: linux-ssl)"

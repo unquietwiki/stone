@@ -1,22 +1,17 @@
 
 			    Simple Repeater
 
-			   stone version 2.3e
+			   stone version 2.4-pre
 
-		Copyright(c)1995-2008 by Hiroaki Sengoku
-			    sengoku@gcd.org
-
+	Copyright(c)1995-2020 by Hiroaki Sengoku <sengoku@gcd.org>
+		Updated 2020 by Michael Adams <unquietwiki@gmail.com>
 
   Stone is a TCP/IP repeater in the application layer.  It repeats TCP
 and UDP from inside to outside of a firewall, or from outside to inside.
 
   Stone has following features:
 
-1.  Stone supports Win32.
-	Formerly, UNIX machines are used as firewalls, but recently
-	WindowsNT machines are used, too.  You can easily run stone on
-	WindowsNT and Windows95.  Of course, available on Linux,
-	FreeBSD, BSD/OS, SunOS, Solaris, HP-UX and so on.
+1.  Stone supports multiple Windows, UNIX, and Linux-based environments.
 
 2.  Simple.
 	Stone's source code is only 10000 lines long (written in C
@@ -382,6 +377,9 @@ HOMEPAGE
 
 	The official homepage of stone is:
 	http://www.gcd.org/sengoku/stone/
+
+	This update is being developed at:
+	https://github.com/unquietwiki/stone
 
 
 COPYRIGHT

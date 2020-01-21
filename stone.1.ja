@@ -1,5 +1,5 @@
 .\" Roff format skeleton provided by Taketo Kabe <kabe@sra-tohoku.co.jp>
-.TH stone 1 "version 2.3"
+.TH stone 1 "version 2.4-pre"
 .
 .SH 名称
 stone \- Simple Repeater

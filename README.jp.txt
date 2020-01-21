@@ -1,10 +1,10 @@
 
 			    Simple Repeater
 
-			   stone version 2.3e
+			   stone version 2.4-pre
 
-		Copyright(c)1995-2008 by Hiroaki Sengoku
-			    sengoku@gcd.org
+	Copyright(c)1995-2020 by Hiroaki Sengoku <sengoku@gcd.org>
+		Updated 2020 by Michael Adams <unquietwiki@gmail.com>
 
 
   stone は、アプリケーションレベルの TCP & UDP リピーターです。ファイア

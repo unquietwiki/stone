@@ -10,10 +10,10 @@ case "$1" in
 	;;
 esac
 shift
-stoneme=stone23me
-stonent=stone23nt
-stonexp=stone23xp
-stonefon=stone23fon
+stoneme=stone24me
+stonent=stone24nt
+stonexp=stone24xp
+stonefon=stone24fon
 if [ -n "$1" ]
 then	stamp=$1
 fi
@@ -53,8 +53,8 @@ nkf_s	logmsg.mc	$stonexp
 nkf_s	cryptoapi.c	$stonexp
 
 mkdir stone-$ver
-#cp -p README.en.txt stone.1 README.txt stone.1.ja stone.c Makefile GPL.txt logmsg.mc cryptoapi.c stone-$ver/.
-cp -p README.en.txt README.txt stone.c Makefile GPL.txt logmsg.mc cryptoapi.c stone-$ver/.
+#cp -p README stone.1 README.jp.txt stone.1.ja stone.c Makefile GPL.txt logmsg.mc cryptoapi.c stone-$ver/.
+cp -p README README.jp.txt stone.c Makefile GPL.txt logmsg.mc cryptoapi.c stone-$ver/.
 sed -e "s/^Version: .*/Version: $ver/" stone.spec > stone-$ver/stone.spec
 
 if [ -n "$stamp" ]

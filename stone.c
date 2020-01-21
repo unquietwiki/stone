@@ -1,6 +1,7 @@
 /*
  * stone.c	simple repeater
- * Copyright(c)1995-2008 by Hiroaki Sengoku <sengoku@gcd.org>
+ * Copyright(c)1995-2020 by Hiroaki Sengoku <sengoku@gcd.org>
+ * Updated 2020 by Michael Adams <unquietwiki@gmail.com>
  * Version 1.0	Jan 28, 1995
  * Version 1.1	Jun  7, 1995
  * Version 1.2	Aug 20, 1995
@@ -13,6 +14,7 @@
  * Version 2.1	Nov 14, 1998	respawn & pop
  * Version 2.2	May 25, 2003	Posix Thread, XferBufMax, no ALRM, SSL verify
  * Version 2.3	Jan  1, 2006	LB, healthCheck, NonBlock, IPv6, sockaddr_un
+ * Version 2.4	2020			Polishing & bugfixing
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,9 +94,9 @@
  * -DNT_SERVICE	  WindowsNT/2000 native service
  * -DUSE_TPROXY	  use TProxy
  */
-#define VERSION	"2.3e"
+#define VERSION	"2.4-pre"
 static char *CVS_ID =
-"@(#) $Id: stone.c,v 2.4 2016/10/07 02:31:51 hiroaki_sengoku Exp $";
+"@(#) $Id: stone.c,v 2.4-pre 2020/01/21 04:00:00 michael_adams Exp $";
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -944,8 +946,8 @@ char *strntime(char *str, int len, time_t *clock, long micro) {
 
 #ifdef NO_GETTIMEOFDAY
 int gettimeofday(struct timeval *tv, void *tz) {
-    static u_long start = 0;
-    u_long tick = GetTickCount();
+    static unsigned long start = 0;
+    unsigned long tick = GetTickCount();
     time_t now;
     time(&now);
     if (start == 0) start = now - tick / 1000;
@@ -965,7 +967,7 @@ int gettimeofday(struct timeval *tv, void *tz) {
 
 #if defined (__STDC__) && __STDC__
 void message(int pri, char *fmt, ...)
-    __attribute__ ((__format__ (__printf__, 2, 3))); 
+    __attribute__ ((__format__ (__printf__, 2, 3)));
 #endif
 
 void message(int pri, char *fmt, ...) {
@@ -1125,7 +1127,7 @@ void message_buf(Pair *pair, int len, char *str) {	/* dump for debug */
 
 char *addr2ip(struct in_addr *addr, char *str, int len) {
     union {
-	u_long	l;
+	unsigned long	l;
 	unsigned char	c[4];
     } u;
     if (len >= 1) {
@@ -1138,9 +1140,9 @@ char *addr2ip(struct in_addr *addr, char *str, int len) {
 
 #ifdef AF_INET6
 char *addr2ip6(struct in6_addr *addr, char *str, int len) {
-    u_short *s;
+    unsigned short *s;
     if (len >= 1) {
-	s = (u_short*)addr;
+	s = (unsigned short*)addr;
 	snprintf(str, len-1, "%x:%x:%x:%x:%x:%x:%x:%x",
 		 ntohs(s[0]), ntohs(s[1]), ntohs(s[2]), ntohs(s[3]),
 		 ntohs(s[4]), ntohs(s[5]), ntohs(s[6]), ntohs(s[7]));
@@ -1259,9 +1261,9 @@ int islocalhost(struct sockaddr *sa) {
 	int i;
 	struct in6_addr *addrp = &((struct sockaddr_in6*)sa)->sin6_addr;
 	for (i=0; i < 12; i+=4)
-	    if (*(u_long*)&addrp->s6_addr[i] != 0) return 0;
-	if (*(u_long*)&addrp->s6_addr[i] == ntohl(1)) return 1;	/* localhost */
-	if (*(u_long*)&addrp->s6_addr[i] == 0) return -1;	/* null */
+	    if (*(unsigned long*)&addrp->s6_addr[i] != 0) return 0;
+	if (*(unsigned long*)&addrp->s6_addr[i] == ntohl(1)) return 1;	/* localhost */
+	if (*(unsigned long*)&addrp->s6_addr[i] == 0) return -1;	/* null */
     }
 #endif
     return 0;
@@ -1456,7 +1458,7 @@ int isdigitaddr(char *name) {
 }
 
 /* set port into struct sockaddr */
-void saPort(struct sockaddr *sa, u_short port) {
+void saPort(struct sockaddr *sa, unsigned short port) {
     if (sa->sa_family == AF_INET) {
 	((struct sockaddr_in*)sa)->sin_port = htons(port);
 	return;
@@ -1698,8 +1700,8 @@ int saComp(struct sockaddr *a, struct sockaddr *b) {
 	bp = ((struct sockaddr_in6*)b)->sin6_port;
 	if (ap != bp) return 0;
 	for (i=0; i < 16; i+=4)
-	    if (*(u_long*)&an->s6_addr[i]
-		!= *(u_long*)&bn->s6_addr[i]) return 0;
+	    if (*(unsigned long*)&an->s6_addr[i]
+		!= *(unsigned long*)&bn->s6_addr[i]) return 0;
 	return 1;
     }
 #endif
@@ -1720,11 +1722,11 @@ XHosts *checkXhost(XHosts *xhosts, struct sockaddr *sa, socklen_t salen) {
 	if (sa->sa_family == AF_INET
 	    && xhosts->xhost.addr.sa_family == AF_INET) {
 	    if (xhosts->mbits > 0) {
-		u_long addr = ntohl(((struct sockaddr_in*)sa)
+		unsigned long addr = ntohl(((struct sockaddr_in*)sa)
 				    ->sin_addr.s_addr);
-		u_long xadr = ntohl(((struct sockaddr_in*)&xhosts->xhost.addr)
+		unsigned long xadr = ntohl(((struct sockaddr_in*)&xhosts->xhost.addr)
 				    ->sin_addr.s_addr);
-		u_long bits = ((u_long)~0 << (32 - xhosts->mbits));
+		unsigned long bits = ((unsigned long)~0 << (32 - xhosts->mbits));
 		if ((addr & bits) != (xadr & bits)) continue;
 	    }
 	    if (match) return xhosts;
@@ -1737,11 +1739,11 @@ XHosts *checkXhost(XHosts *xhosts, struct sockaddr *sa, socklen_t salen) {
 				      &xhosts->xhost.addr)->sin6_addr;
 	    int j, k;
 	    for (j=0, k=xhosts->mbits; k > 0; j+=4, k -= 32) {
-		u_long addr, xadr, mask;
-		addr = ntohl(*(u_long*)&adrp->s6_addr[j]);
-		xadr = ntohl(*(u_long*)&xadp->s6_addr[j]);
-		if (k >= 32) mask = (u_long)~0;
-		else mask = ((u_long)~0 << (32-k));	/* premise: k > 0 */
+		unsigned long addr, xadr, mask;
+		addr = ntohl(*(unsigned long*)&adrp->s6_addr[j]);
+		xadr = ntohl(*(unsigned long*)&xadp->s6_addr[j]);
+		if (k >= 32) mask = (unsigned long)~0;
+		else mask = ((unsigned long)~0 << (32-k));	/* premise: k > 0 */
 		if (Debug > 12)
 		    message(LOG_DEBUG, "compare addr=%lx x=%lx m=%lx",
 			    addr, xadr, mask);
@@ -1754,14 +1756,14 @@ XHosts *checkXhost(XHosts *xhosts, struct sockaddr *sa, socklen_t salen) {
 	} else if (sa->sa_family == AF_INET6
 		   && xhosts->xhost.addr.sa_family == AF_INET) {
 	    struct in6_addr *adrp = &((struct sockaddr_in6*)sa)->sin6_addr;
-	    if (*(u_long*)&adrp->s6_addr[0] != 0
-		|| *(u_long*)&adrp->s6_addr[4] != 0
-		|| ntohl(*(u_long*)&adrp->s6_addr[8]) != 0xFFFF) continue;
+	    if (*(unsigned long*)&adrp->s6_addr[0] != 0
+		|| *(unsigned long*)&adrp->s6_addr[4] != 0
+		|| ntohl(*(unsigned long*)&adrp->s6_addr[8]) != 0xFFFF) continue;
 	    if (xhosts->mbits > 0) {
-		u_long addr = ntohl(*(u_long*)&adrp->s6_addr[12]);
-		u_long xadr = ntohl(((struct sockaddr_in*)&xhosts->xhost.addr)
+		unsigned long addr = ntohl(*(unsigned long*)&adrp->s6_addr[12]);
+		unsigned long xadr = ntohl(((struct sockaddr_in*)&xhosts->xhost.addr)
 				    ->sin_addr.s_addr);
-		u_long bits = ((u_long)~0 << (32 - xhosts->mbits));
+		unsigned long bits = ((unsigned long)~0 << (32 - xhosts->mbits));
 		if ((addr & bits) != (xadr & bits)) continue;
 	    }
 	    if (match) return xhosts;
@@ -1873,7 +1875,7 @@ int healthCheck(struct sockaddr *sa, socklen_t salen,
     int ret;
     char addrport[STRMAX+1];
 #ifdef WINDOWS
-    u_long param;
+    unsigned long param;
 #endif
 #ifdef USE_EPOLL
     int epfd;
@@ -2807,7 +2809,7 @@ Origin *getOrigins(struct sockaddr *from, socklen_t fromlen, Stone *stone) {
     }
     if (!(stone->proto & proto_block_d)) {
 #ifdef WINDOWS
-	u_long param;
+	unsigned long param;
 	param = 1;
 	ioctlsocket(sd, FIONBIO, &param);
 #else
@@ -4037,7 +4039,7 @@ int doconnect(Pair *p1, struct sockaddr *sa, socklen_t salen) {
     struct epoll_event ev;
 #endif
 #ifdef WINDOWS
-    u_long param;
+    unsigned long param;
 #endif
     if (p1 == NULL) return -1;
     p2 = p1->pair;
@@ -4341,7 +4343,7 @@ int getident(char *str, struct sockaddr *sa, socklen_t salen,
     int ret;
     char addr[STRMAX+1];
 #ifdef WINDOWS
-    u_long param;
+    unsigned long param;
 #endif
     time_t start, now;
 #ifdef USE_EPOLL
@@ -4596,7 +4598,7 @@ int acceptCheck(Pair *pair1) {
 			 fromstr+fslen, STRMAX*2-fslen, 0);
 	fprintf(AccFp, "%s%d[%d] %s[%s]\n",
 		tstr, stone->port, stone->sd, fromstr, str);
-		
+
     }
     if ((xhost->mode & XHostsMode_Dump) > 0 || Debug > 1) {
 	addrport2strOnce(from, fromlen, (stone->proto & proto_stone_s),
@@ -4619,7 +4621,7 @@ int acceptCheck(Pair *pair1) {
     /* now successfully accepted */
     if (!(stone->proto & proto_block_d)) {
 #ifdef WINDOWS
-	u_long param;
+	unsigned long param;
 	param = 1;
 	ioctlsocket(pair1->sd, FIONBIO, &param);
 #else
@@ -8090,7 +8092,7 @@ typedef int sa_family_t;
 void mkXhostsExt(char *host, char *str, XHosts *ext) {
     int kind = 0;
     char *top = NULL;	/* dummy init to suppress warnings */
-    u_long num = 0;
+    unsigned long num = 0;
     int i = 0;
     do {
 	switch(kind) {
@@ -8550,7 +8552,7 @@ Stone *mkstone(
 	    }
 	    if (!(stone->proto & proto_block_s)) {
 #ifdef WINDOWS
-		u_long param;
+		unsigned long param;
 		param = 1;
 		ioctlsocket(stone->sd, FIONBIO, &param);
 #else
@@ -10359,7 +10361,7 @@ void daemonize(void) {
     if (pid < 0) {
 	message(LOG_ERR, "Can't create daemon err=%d", errno);
 	exit(1);
-    } 
+    }
     if (pid > 0) _exit(0);
     MyPid = getpid();
     if (setsid() < 0)
@@ -10405,7 +10407,7 @@ void initialize(int argc, char *argv[]) {
 	message(LOG_WARNING, "Can't collect enough random seeds");
 	srand(time(NULL));
 	do {
-	    u_short rnd = (u_short)rand();
+	    unsigned short rnd = (unsigned short)rand();
 	    RAND_seed(&rnd, sizeof(rnd));
 	} while (!RAND_status());
     }
